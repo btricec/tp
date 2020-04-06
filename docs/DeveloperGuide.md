@@ -175,23 +175,19 @@ The continue feature allows the user to continue a previously ended activity.
 ![Continue command sequence diagram](./pictures/continue.png)
 
 **Continuing an activity:**
-
-When the user enters the command to continue an activity, a *ContinueCommand* object is created in *Parser*. The method `executeCommand()` of the *ContinueCommand* object is then called and does the following:
-
- 1. Checks if the given activity name exists in the activityList by calling `findActivity()` (if it doesn’t an exception is thrown, omitted in the sequence diagram above)
- 2. Gets the `name` and `tags` of the activity to be continued and saves it to a public static variable of *Parser* object
- 3. Gets the current time and saves it to a public static variable of *Parser* object
+* When the user enters the command to continue an activity, a *ContinueCommand* object is created in *Parser*. The method `executeCommand()` of the *ContinueCommand* object is then called.
+* `executeCommand` checks if the given activity name exists in the activityList by calling `findActivity()` (if it doesn’t an exception is thrown, omitted in the sequence diagram above)
+* It then gets the `name` and `tags` of the activity to be continued and saves it to a public static variable of *Parser* object.
+* It also gets the current time and saves it to a public static variable of *Parser* object.
  
  ![End command sequence diagram](./pictures/end.png)
 
  **Ending a continued activity:**
- 
-When the user wants to end the continued activity, an *EndCommand* object is created in *Parser.* The method `executeCommand()` of the *ContinueCommand* object is then called and it in turn executes the `saveActivity()` method of the *ActivityList* class. The continued activity is then saved by executing the following:
-
- 1. Gets the current time and saves it to a public static variable of *Parser* object
-2.  Calculates the elapsed time using the `between()` method of *Duration* class
-3.  Adds the elapsed time with the previous duration of the activity to get the `newDuration` using the `plus()` method of Duration class
-4.  Calls the `updateDuration()` method, which updates the `duration` attribute of the continued activity in the `activityList` as well as the `data.csv` file
+* When the user wants to end the continued activity, an *EndCommand* object is created in *Parser.* The method `executeCommand()` of the *ContinueCommand* object is then called and it in turn executes the `saveActivity()` method of the *ActivityList* class.
+* `saveActivity()` gets the current time and saves it to a public static variable of *Parser* object.
+* Then the elapsed time is calculated using the `between()` method of *Duration* class.
+* The elapsed time is added with the previous duration of the activity to get the `newDuration` using the `plus()` method of Duration class.
+* `updateDuration()` method is called to update the `duration` attribute of the continued activity in the `activityList` as well as the `data.csv` file.
 
 #### 3.5.2 Design Considerations
 
@@ -270,7 +266,7 @@ This feature accepts multiple space-separated keywords to search for activities 
 
 ### 3.9 Graph Feature
 This feature gives the user a visual representation of their activity duration and activity goals.  
-Graph can be used along with List, Find and Filter to sieve out the data to be graphed.
+Graph can be used along with `list`, `find` and `filter` to sieve out the data to be graphed.
 
 #### 3.9.1 Current Implementation
 ![graph seq diagram](./pictures/graph.png)
@@ -279,15 +275,26 @@ Graph can be used along with List, Find and Filter to sieve out the data to be g
 * The GraphCommand will invoke its own `executeCommand()` method.  
 
 **Graph targets**  
-This displays a progress bar for the activities in the activity list 
+This displays the progress bar for the duration with respect to allocated time of activities in the `lastShownList`. 
 * If the user indicated `targets`, Ui calss will be called to execute graphTargets.
 
-**Graph tags**
+**Graph tags**  
+This displays a bar graph of the cumulative duration of the tags for each activity in the `lastShownList`.
+E.g. if 3 activities in the `lastshownlist` are tagged `CS2113`, the durations of these 3 activities are added up and associated with the tag `CS2113` in the graph.
 * If the user indicated `tags`, `GraphCommand` will call it's own `graphTags` method.
-* A HashMap of tags to duration is created. The duration of every activity associated with the same tag is summed to get a 
-  * Example: If tw
-*  which in turn calls `extractTags` in a loop that iterates through every activity in `lastshownlist`.
-* `extractTags` loops through the tags of that activity. It checks if the tag exists in a HashMap of tags. 
+* A HashMap (`tags`) of tags to duration is created.
+* `graphTags` iterates through every activity in `lastshownlist` and in each loop, `extractTags` is called.
+* `extractTags` loops through the tags of that activity. Tag is added to the `tags` if it is not found. Else, the duration of the activity is added to the corresponding tag in `tags`.
+* `tags` and `interval` (how many minutes each point in the graph represents) is passed to the method printTagGraphs in Ui to print the graph.
+
+**Graph activities**
+This displays a bar graph of the durations of each activity in the `lastShownList`.
+* If the user indicated `activities`, `GraphCommand` will call it's own `graphDuration` method.
+* `graphDuration` calls `printActivityGraph` of the Ui class and passes the `interval` parameter, which is how many minutes each point in the graph represents.
+
+#### 3.9.2 Additional features
+As graph gets it's data based on the `lastShownList`, users can pair the `graph` command with `find`, `filter`, and `list` to sieve out the activities to be graphed.
+
 
 ## 4. Appendix
 ### Product Scope
